@@ -12,11 +12,13 @@ Device: /dev/bus/usb/001/004
   Standard printer interface: NO
   Vendor-specific interface: YES
   Bulk endpoints present: YES
-    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=2
-    Interface 1: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
-    Interface 2: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
-    Interface 3: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
-    Interface 4: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=3
+  Usb Probe: Interface 0 claimed
+      OUT endpoint 1 test result=-1
+    Interface 1 claimed
+      OUT endpoint 2 test result=-1
+    Interface 2 claimed
+      OUT endpoint 2 test result=0
+      Bulk OUT probe appears accepted.
 
 Device: /dev/bus/usb/001/003
   Vendor ID: 0x0FE6
@@ -26,10 +28,13 @@ Device: /dev/bus/usb/001/003
   Standard printer interface: NO
   Vendor-specific interface: YES
   Bulk endpoints present: YES
-    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0x00 endpoints=3
-    Interface 1: class=0x02 (Communications Control) subclass=0x06 protocol=0x00 endpoints=1
-    Interface 2: class=0x0A (Smart Card) subclass=0x00 protocol=0x00 endpoints=0
-    Interface 3: class=0x0A (Smart Card) subclass=0x00 protocol=0x00 endpoints=2
+  Usb Probe: Interface 0 claimed
+      OUT endpoint 1 test result=-1
+    Interface 1 claimed
+    Interface 2 claimed
+    Interface 3 claimed
+      OUT endpoint 1 test result=-1
+    No bulk OUT probe succeeded
 
 Summary:
   - Standard printer support detected: NO
@@ -37,6 +42,17 @@ Summary:
 
 This device does not expose a standard printer interface. Generic printer APIs are unlikely to work.
 The connected device appears vendor-specific and likely requires a proprietary driver or SDK.
+
+
+--- Vendor/Driver Package Inspection ---
+  - com.client.printerutil (Printer Util)
+  - app.dukkantek.pos (Dukkantek POS)
+  - com.paydevice.updater (Updater)
+  - com.paydevice.devicemanager (Device Manager)
+  - com.dukkantek.pos (DUKKANTEK)
+  - com.paydevice.hardwaretest (Hardware test)
+  - com.paydevice.smartpos.demo (SmartPosDemo)
+
 If printing is required, the next useful checks are:
   1) Verify vendor SDK or driver documentation for the device.
   2) Test whether the device supports bulk IN/OUT transfers for custom protocol data.
