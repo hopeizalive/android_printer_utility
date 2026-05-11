@@ -33,6 +33,17 @@ android {
     }
 }
 
+// Transitive AndroidX libs can pull mismatched kotlin-stdlib / jdk7 / jdk8 jars → duplicate classes at dex.
+configurations.configureEach {
+    resolutionStrategy {
+        force(
+            "org.jetbrains.kotlin:kotlin-stdlib:1.9.24",
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24",
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24"
+        )
+    }
+}
+
 dependencies {
     implementation("androidx.core:core:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")

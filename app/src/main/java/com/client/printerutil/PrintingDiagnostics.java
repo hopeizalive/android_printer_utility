@@ -11,6 +11,7 @@ import android.os.Build;
 import android.print.PrintJob;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.print.PrinterId;
 
 import androidx.annotation.RequiresApi;
 
@@ -82,15 +83,18 @@ public final class PrintingDiagnostics {
     private static void appendPrintJob(List<String> lines, PrintJob job) {
         PrintJobInfo info = job.getInfo();
         String stateName = printJobStateName(info.getState());
-        String printer;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            String pn = info.getPrinterName();
-            printer = pn != null ? pn : "(printer name N/A)";
-        } else {
-            printer = "(printer name requires API 29+)";
-        }
+        // Human-readable name is getPrinterName() (API 29+). PrinterId is API 21+ and always on the classpath.
+        PrinterId printerId = info.getPrinterId();
+        String printerRef =
+                printerId != null ? printerId.getLocalId() : "(no PrinterId)";
         lines.add("  • " + info.getLabel());
-        lines.add("    state=" + stateName + "  printer=" + printer + "  id=" + String.valueOf(job.getId()));
+        lines.add(
+                "    state="
+                        + stateName
+                        + "  printerId="
+                        + printerRef
+                        + "  jobId="
+                        + String.valueOf(job.getId()));
     }
 
     private static String printJobStateName(int state) {
