@@ -19,6 +19,31 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/app_name" />
 
+    <LinearLayout
+        android:id="@+id/tabRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <Button
+            android:id="@+id/buttonDiagnosticsTab"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tab_diagnostics" />
+
+        <Button
+            android:id="@+id/buttonUsbTestTab"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tab_usb_test" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/buttonRefresh"
         android:layout_width="wrap_content"
@@ -26,7 +51,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/refresh"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/tabRow" />
 
     <Button
         android:id="@+id/buttonPrintSettings"

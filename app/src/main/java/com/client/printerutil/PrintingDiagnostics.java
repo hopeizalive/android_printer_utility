@@ -129,14 +129,39 @@ public final class PrintingDiagnostics {
             sb.append(describeUsbDevice(d)).append('\n');
         }
         int printerCount = 0;
+        int vendorSpecificCount = 0;
         for (UsbDevice d : devices) {
             if (looksLikeUsbPrinter(d)) {
                 printerCount++;
             }
+            if (hasVendorSpecificInterface(d)) {
+                vendorSpecificCount++;
+            }
         }
         sb.append('\n');
-        sb.append("Likely USB printers (class 7 / interface printer): ").append(printerCount);
+        sb.append("Likely USB printers (class 7 / interface printer): ").append(printerCount).append("\n");
+        sb.append("Vendor-specific USB devices: ").append(vendorSpecificCount).append("\n");
+        if (vendorSpecificCount > 0 && printerCount == 0) {
+            sb.append("Note: One or more connected USB devices use vendor-specific interfaces and may require a proprietary driver or SDK.\n");
+        }
+        sb.append("Note: Standard USB printer commands are only likely to work if the device reports printer class or has printer interfaces.\n");
         return sb.toString().trim();
+    }
+
+    private static boolean hasVendorSpecificInterface(UsbDevice device) {
+        for (int ci = 0; ci < device.getConfigurationCount(); ci++) {
+            UsbConfiguration cfg = device.getConfiguration(ci);
+            if (cfg == null) {
+                continue;
+            }
+            for (int ii = 0; ii < cfg.getInterfaceCount(); ii++) {
+                UsbInterface intf = cfg.getInterface(ii);
+                if (intf.getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static boolean looksLikeUsbPrinter(UsbDevice device) {
@@ -169,6 +194,47 @@ public final class PrintingDiagnostics {
         } else {
             name = d.getDeviceName();
         }
-        return "  • " + name + printerHint + "  VID=" + vid + " PID=" + pid + "  " + d.getDeviceName();
+        StringBuilder builder = new StringBuilder();
+        builder.append("  • ").append(name).append(printerHint).append("  VID=").append(vid).append(" PID=").append(pid).append("  ").append(d.getDeviceName()).append("\n");
+        builder.append("    DeviceClass: 0x").append(String.format(Locale.US, "%02X", d.getDeviceClass())).append(" (" + usbClassName(d.getDeviceClass()) + ")\n");
+        for (int ci = 0; ci < d.getConfigurationCount(); ci++) {
+            UsbConfiguration cfg = d.getConfiguration(ci);
+            if (cfg == null) {
+                continue;
+            }
+            for (int ii = 0; ii < cfg.getInterfaceCount(); ii++) {
+                UsbInterface intf = cfg.getInterface(ii);
+                builder.append("    Interface ").append(ii).append(": class=0x").append(String.format(Locale.US, "%02X", intf.getInterfaceClass())).append(" (" + usbClassName(intf.getInterfaceClass()) + ")");
+                builder.append(" subclass=0x").append(String.format(Locale.US, "%02X", intf.getInterfaceSubclass())).append(" protocol=0x").append(String.format(Locale.US, "%02X", intf.getInterfaceProtocol())).append(" endpoints=").append(intf.getEndpointCount()).append("\n");
+            }
+        }
+        return builder.toString().trim();
+    }
+
+    private static String usbClassName(int usbClass) {
+        switch (usbClass) {
+            case UsbConstants.USB_CLASS_PRINTER:
+                return "Printer";
+            case UsbConstants.USB_CLASS_VENDOR_SPEC:
+                return "Vendor Specific";
+            case UsbConstants.USB_CLASS_COMM:
+                return "Communications";
+            case UsbConstants.USB_CLASS_HID:
+                return "Human Interface Device";
+            case UsbConstants.USB_CLASS_MASS_STORAGE:
+                return "Mass Storage";
+            case UsbConstants.USB_CLASS_HUB:
+                return "Hub";
+            case UsbConstants.USB_CLASS_AUDIO:
+                return "Audio";
+            case UsbConstants.USB_CLASS_CDC_DATA:
+                return "CDC Data";
+            case UsbConstants.USB_CLASS_VIDEO:
+                return "Video";
+            case UsbConstants.USB_CLASS_WIRELESS_CONTROLLER:
+                return "Wireless";
+            default:
+                return usbClass == 0 ? "Device Defined" : "Unknown";
+        }
     }
 }

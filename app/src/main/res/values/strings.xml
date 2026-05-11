@@ -3,4 +3,6 @@
     <string name="refresh">Refresh</string>
     <string name="open_print_settings">Open print settings</string>
     <string name="copy_to_clipboard">Copy</string>
+    <string name="tab_diagnostics">Diagnostics</string>
+    <string name="tab_usb_test">USB Test</string>
 </resources>

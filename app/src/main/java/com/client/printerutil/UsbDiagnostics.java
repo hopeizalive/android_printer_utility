@@ -2,7 +2,9 @@ package com.client.printerutil;
 
 import android.content.Context;
 import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 
@@ -160,6 +162,119 @@ public class UsbDiagnostics {
         }
 
         return status.toString();
+    }
+
+    public String buildUsbTestReport() {
+        if (usbManager == null) {
+            return "USB diagnostics unavailable.\n";
+        }
+
+        StringBuilder report = new StringBuilder();
+        report.append("\n=== USB PRINTER TEST ===\n");
+        report.append("API Level: ").append(Build.VERSION.SDK_INT).append("\n");
+        report.append("USB Host Feature: ");
+        boolean hasUsbHost = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                && context.getPackageManager().hasSystemFeature("android.hardware.usb.host");
+        report.append(hasUsbHost ? "SUPPORTED\n" : "NOT SUPPORTED\n");
+
+        HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+        if (deviceList.isEmpty()) {
+            report.append("No USB devices detected.\n");
+            return report.toString();
+        }
+
+        report.append("Found ").append(deviceList.size()).append(" USB device(s):\n\n");
+        boolean hasStandardPrinter = false;
+        boolean hasVendorSpecific = false;
+
+        for (UsbDevice device : deviceList.values()) {
+            report.append("Device: ").append(device.getDeviceName()).append("\n");
+            report.append("  Vendor ID: 0x").append(String.format("%04X", device.getVendorId())).append("\n");
+            report.append("  Product ID: 0x").append(String.format("%04X", device.getProductId())).append("\n");
+            report.append("  Device Class: 0x").append(String.format("%02X", device.getDeviceClass()))
+                    .append(" (" + getDeviceClassName(device.getDeviceClass()) + ")\n");
+            report.append("  Interface count: ").append(device.getInterfaceCount()).append("\n");
+
+            boolean standardPrinter = looksLikeUsbPrinter(device);
+            boolean vendorSpecific = hasVendorSpecificInterface(device);
+            boolean bulkEndpoints = hasBulkEndpoints(device);
+
+            report.append("  Standard printer interface: ").append(standardPrinter ? "YES" : "NO").append("\n");
+            report.append("  Vendor-specific interface: ").append(vendorSpecific ? "YES" : "NO").append("\n");
+            report.append("  Bulk endpoints present: ").append(bulkEndpoints ? "YES" : "NO").append("\n");
+
+            if (standardPrinter) {
+                hasStandardPrinter = true;
+            }
+            if (vendorSpecific) {
+                hasVendorSpecific = true;
+            }
+
+            for (int i = 0; i < device.getInterfaceCount(); i++) {
+                UsbInterface intf = device.getInterface(i);
+                report.append("    Interface ").append(i).append(": class=0x")
+                        .append(String.format("%02X", intf.getInterfaceClass()))
+                        .append(" (" + getInterfaceClassName(intf.getInterfaceClass()) + ")")
+                        .append(" subclass=0x").append(String.format("%02X", intf.getInterfaceSubclass()))
+                        .append(" protocol=0x").append(String.format("%02X", intf.getInterfaceProtocol()))
+                        .append(" endpoints=").append(intf.getEndpointCount()).append("\n");
+            }
+            report.append("\n");
+        }
+
+        report.append("Summary:\n");
+        report.append("  - Standard printer support detected: ").append(hasStandardPrinter ? "YES" : "NO").append("\n");
+        report.append("  - Vendor-specific device surfaces: ").append(hasVendorSpecific ? "YES" : "NO").append("\n");
+        report.append("\n");
+        if (hasStandardPrinter) {
+            report.append("This device exposes a standard printer interface. Generic USB printer APIs may work.\n");
+        } else {
+            report.append("This device does not expose a standard printer interface. Generic printer APIs are unlikely to work.\n");
+        }
+        if (hasVendorSpecific) {
+            report.append("The connected device appears vendor-specific and likely requires a proprietary driver or SDK.\n");
+        }
+        report.append("If printing is required, the next useful checks are:\n");
+        report.append("  1) Verify vendor SDK or driver documentation for the device.\n");
+        report.append("  2) Test whether the device supports bulk IN/OUT transfers for custom protocol data.\n");
+        report.append("  3) Compare with the existing SmartPosDemo app behavior to identify printer-specific commands.\n");
+
+        return report.toString();
+    }
+
+    private boolean hasBulkEndpoints(UsbDevice device) {
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            UsbInterface intf = device.getInterface(i);
+            for (int e = 0; e < intf.getEndpointCount(); e++) {
+                if (intf.getEndpoint(e).getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasVendorSpecificInterface(UsbDevice device) {
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            UsbInterface intf = device.getInterface(i);
+            if (intf.getInterfaceClass() == UsbConstants.USB_CLASS_VENDOR_SPEC) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean looksLikeUsbPrinter(UsbDevice device) {
+        if (device.getDeviceClass() == UsbConstants.USB_CLASS_PRINTER) {
+            return true;
+        }
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            UsbInterface intf = device.getInterface(i);
+            if (intf.getInterfaceClass() == UsbConstants.USB_CLASS_PRINTER) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

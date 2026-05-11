@@ -1,5 +1,7 @@
 package com.client.printerutil;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -14,7 +16,13 @@ import com.client.printerutil.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    private enum Tab {
+        DIAGNOSTICS,
+        USB_TEST
+    }
+
     private ActivityMainBinding binding;
+    private Tab currentTab = Tab.DIAGNOSTICS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +32,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
 
+        binding.buttonDiagnosticsTab.setOnClickListener(v -> setTab(Tab.DIAGNOSTICS));
+        binding.buttonUsbTestTab.setOnClickListener(v -> setTab(Tab.USB_TEST));
         binding.buttonRefresh.setOnClickListener(v -> refreshStatus());
         binding.buttonPrintSettings.setOnClickListener(v -> openPrintSettings());
         binding.buttonCopy.setOnClickListener(v -> copyToClipboard());
 
-        refreshStatus();
+        setTab(Tab.DIAGNOSTICS);
     }
 
     @Override
@@ -37,10 +47,21 @@ public class MainActivity extends AppCompatActivity {
         refreshStatus();
     }
 
+    private void setTab(Tab tab) {
+        currentTab = tab;
+        binding.buttonDiagnosticsTab.setEnabled(tab != Tab.DIAGNOSTICS);
+        binding.buttonUsbTestTab.setEnabled(tab != Tab.USB_TEST);
+        refreshStatus();
+    }
+
     private void refreshStatus() {
-        String diagnosticReport = PrintingDiagnostics.buildReport(this);
-        String usbReport = new UsbDiagnostics(this).buildUsbReport();
-        binding.textStatus.setText(diagnosticReport + usbReport);
+        String text;
+        if (currentTab == Tab.USB_TEST) {
+            text = new UsbDiagnostics(this).buildUsbTestReport();
+        } else {
+            text = PrintingDiagnostics.buildReport(this);
+        }
+        binding.textStatus.setText(text);
     }
 
     private void copyToClipboard() {
@@ -50,9 +71,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        android.content.ClipboardManager clipboard = 
-            (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        android.content.ClipData clip = android.content.ClipData.newPlainText("Printer Diagnostics", text);
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("Printer Diagnostics", text);
         clipboard.setPrimaryClip(clip);
         Toast.makeText(this, "Diagnostics copied to clipboard", Toast.LENGTH_SHORT).show();
     }
