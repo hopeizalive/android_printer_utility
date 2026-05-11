@@ -2,4 +2,5 @@
     <string name="app_name">Printer Util</string>
     <string name="refresh">Refresh</string>
     <string name="open_print_settings">Open print settings</string>
+    <string name="copy_to_clipboard">Copy</string>
 </resources>

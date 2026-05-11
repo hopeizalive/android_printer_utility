@@ -1,9 +1,11 @@
 package com.client.printerutil;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
@@ -24,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding.buttonRefresh.setOnClickListener(v -> refreshStatus());
         binding.buttonPrintSettings.setOnClickListener(v -> openPrintSettings());
+        binding.buttonCopy.setOnClickListener(v -> copyToClipboard());
 
         refreshStatus();
     }
@@ -35,7 +38,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshStatus() {
-        binding.textStatus.setText(PrintingDiagnostics.buildReport(this));
+        String diagnosticReport = PrintingDiagnostics.buildReport(this);
+        String usbReport = new UsbDiagnostics(this).buildUsbReport();
+        binding.textStatus.setText(diagnosticReport + usbReport);
+    }
+
+    private void copyToClipboard() {
+        String text = binding.textStatus.getText().toString();
+        if (text.isEmpty()) {
+            Toast.makeText(this, "No content to copy", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        android.content.ClipboardManager clipboard = 
+            (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        android.content.ClipData clip = android.content.ClipData.newPlainText("Printer Diagnostics", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(this, "Diagnostics copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
     private void openPrintSettings() {

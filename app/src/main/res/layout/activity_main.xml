@@ -38,6 +38,16 @@
         app:layout_constraintBaseline_toBaselineOf="@id/buttonRefresh"
         app:layout_constraintStart_toEndOf="@id/buttonRefresh" />
 
+    <Button
+        android:id="@+id/buttonCopy"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/copy_to_clipboard"
+        app:layout_constraintBaseline_toBaselineOf="@id/buttonRefresh"
+        app:layout_constraintStart_toEndOf="@id/buttonPrintSettings" />
+
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
