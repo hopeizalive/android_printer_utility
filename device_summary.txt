@@ -7,104 +7,26 @@ PrintManager available: true
 Print job listing requires API 28+ (current device is lower).
 
 USB devices (2):
-  • Android  VID=0x2C7C PID=0x0125  /dev/bus/usb/001/004
-  • USB 10/100 LAN  VID=0x0FE6 PID=0x9900  /dev/bus/usb/001/003
+• Android  VID=0x2C7C PID=0x0125  /dev/bus/usb/001/004
+    DeviceClass: 0xEF (Unknown)
+    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=2
+    Interface 1: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 2: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 3: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 4: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=3
+• USB 10/100 LAN  VID=0x0FE6 PID=0x9900  /dev/bus/usb/001/003
+    DeviceClass: 0x00 (Device Defined)
+    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0x00 endpoints=3
+    Interface 0: class=0x02 (Communications) subclass=0x06 protocol=0x00 endpoints=1
+    Interface 1: class=0x0A (CDC Data) subclass=0x00 protocol=0x00 endpoints=0
+    Interface 2: class=0x0A (CDC Data) subclass=0x00 protocol=0x00 endpoints=2
 
 Likely USB printers (class 7 / interface printer): 0
+Vendor-specific USB devices: 2
+Note: One or more connected USB devices use vendor-specific interfaces and may require a proprietary driver or SDK.
+Note: Standard USB printer commands are only likely to work if the device reports printer class or has printer interfaces.
 
 Notes:
 - Wi‑Fi / IPP printers often need the manufacturer print service app.
 - Thermal Bluetooth printers need Bluetooth permissions and vendor SDKs.
 - Use Refresh after plugging USB; grant USB permission if the system prompts.
-=== USB HOST API INFORMATION ===
-API Level: 25
-USB Host Feature: SUPPORTED
-
---- USB Devices Enumeration ---
-Found 2 USB device(s):
-
-Device: /dev/bus/usb/001/004
-  Vendor ID: 0x2C7C
-  Product ID: 0x0125
-  Device Class: 0xEF (Unknown (0xEF))
-  Device Subclass: 0x02
-  Device Protocol: 0x01
-  Serial Number: N/A
-  Manufacturer: Android
-  Product Name: Android
-  Interfaces: 5
-    Interface 0:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0xFF
-      Protocol: 0xFF
-      Endpoint Count: 2
-    Interface 1:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0x00
-      Protocol: 0x00
-      Endpoint Count: 3
-    Interface 2:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0x00
-      Protocol: 0x00
-      Endpoint Count: 3
-    Interface 3:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0x00
-      Protocol: 0x00
-      Endpoint Count: 3
-    Interface 4:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0xFF
-      Protocol: 0xFF
-      Endpoint Count: 3
-  Has Permission: YES
-
-Device: /dev/bus/usb/001/003
-  Vendor ID: 0x0FE6
-  Product ID: 0x9900
-  Device Class: 0x00 (Device Defined Class)
-  Device Subclass: 0x00
-  Device Protocol: 0x00
-  Serial Number: 00E0995F0368
-  Manufacturer: CoreChips
-  Product Name: USB 10/100 LAN
-  Interfaces: 4
-    Interface 0:
-      Class: 0xFF (Vendor Specific)
-      Subclass: 0xFF
-      Protocol: 0x00
-      Endpoint Count: 3
-    Interface 1:
-      Class: 0x02 (Communications Control)
-      Subclass: 0x06
-      Protocol: 0x00
-      Endpoint Count: 1
-    Interface 2:
-      Class: 0x0A (Smart Card)
-      Subclass: 0x00
-      Protocol: 0x00
-      Endpoint Count: 0
-    Interface 3:
-      Class: 0x0A (Smart Card)
-      Subclass: 0x00
-      Protocol: 0x00
-      Endpoint Count: 2
-  Has Permission: YES
-
-
---- USB Accessories ---
-No USB accessories detected.
-
---- Permission Status ---
-App Package: com.client.printerutil
-USB Backend: AVAILABLE
-Connected Devices with Permission:
-  - Android
-  - USB 10/100 LAN
-
-To request permission for a device:
-  1. Tap a device in the main report
-  2. System will prompt for USB permission
-  3. Tap 'Allow' to grant access
-does 

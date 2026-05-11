@@ -1,14 +1,19 @@
 package com.client.printerutil;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * USB diagnostics helper for API 25+ devices.
@@ -54,9 +59,6 @@ public class UsbDiagnostics {
         return report.toString();
     }
 
-    /**
-     * Get detailed information about all connected USB devices.
-     */
     private String getUsbDevicesInfo() {
         if (usbManager == null) {
             return "USB Manager not available.\n";
@@ -83,29 +85,33 @@ public class UsbDiagnostics {
             info.append("  Product Name: ").append(device.getProductName()).append("\n");
             info.append("  Interfaces: ").append(device.getInterfaceCount()).append("\n");
 
-            // Interface details
             for (int i = 0; i < device.getInterfaceCount(); i++) {
+                UsbInterface intf = device.getInterface(i);
                 info.append("    Interface ").append(i).append(":\n");
-                info.append("      Class: 0x").append(String.format("%02X", device.getInterface(i).getInterfaceClass()));
-                info.append(" (").append(getInterfaceClassName(device.getInterface(i).getInterfaceClass())).append(")\n");
-                info.append("      Subclass: 0x").append(String.format("%02X", device.getInterface(i).getInterfaceSubclass())).append("\n");
-                info.append("      Protocol: 0x").append(String.format("%02X", device.getInterface(i).getInterfaceProtocol())).append("\n");
-                info.append("      Endpoint Count: ").append(device.getInterface(i).getEndpointCount()).append("\n");
+                info.append("      Class: 0x").append(String.format("%02X", intf.getInterfaceClass()));
+                info.append(" (").append(getInterfaceClassName(intf.getInterfaceClass())).append(")\n");
+                info.append("      Subclass: 0x").append(String.format("%02X", intf.getInterfaceSubclass())).append("\n");
+                info.append("      Protocol: 0x").append(String.format("%02X", intf.getInterfaceProtocol())).append("\n");
+                info.append("      Endpoint Count: ").append(intf.getEndpointCount()).append("\n");
+                for (int e = 0; e < intf.getEndpointCount(); e++) {
+                    UsbEndpoint endpoint = intf.getEndpoint(e);
+                    info.append("        Endpoint ").append(e).append(": type=")
+                            .append(endpointTypeName(endpoint.getType()))
+                            .append(" direction=")
+                            .append(endpointDirectionName(endpoint.getDirection()))
+                            .append(" packetSize=")
+                            .append(endpoint.getMaxPacketSize())
+                            .append("\n");
+                }
             }
 
-            // Check if app has permission
             boolean hasPermission = usbManager.hasPermission(device);
-            info.append("  Has Permission: ").append(hasPermission ? "YES" : "NO").append("\n");
-
-            info.append("\n");
+            info.append("  Has Permission: ").append(hasPermission ? "YES" : "NO").append("\n\n");
         }
 
         return info.toString();
     }
 
-    /**
-     * Get information about USB accessories.
-     */
     private String getUsbAccessoriesInfo() {
         if (usbManager == null) {
             return "USB Manager not available.\n";
@@ -130,9 +136,6 @@ public class UsbDiagnostics {
         return "Accessory info available on API 21+\n";
     }
 
-    /**
-     * Get USB permission status for the app.
-     */
     private String getPermissionStatus() {
         StringBuilder status = new StringBuilder();
         status.append("App Package: ").append(context.getPackageName()).append("\n");
@@ -192,7 +195,7 @@ public class UsbDiagnostics {
             report.append("  Vendor ID: 0x").append(String.format("%04X", device.getVendorId())).append("\n");
             report.append("  Product ID: 0x").append(String.format("%04X", device.getProductId())).append("\n");
             report.append("  Device Class: 0x").append(String.format("%02X", device.getDeviceClass()))
-                    .append(" (" + getDeviceClassName(device.getDeviceClass()) + ")\n");
+                    .append(" (").append(getDeviceClassName(device.getDeviceClass())).append(")\n");
             report.append("  Interface count: ").append(device.getInterfaceCount()).append("\n");
 
             boolean standardPrinter = looksLikeUsbPrinter(device);
@@ -210,22 +213,13 @@ public class UsbDiagnostics {
                 hasVendorSpecific = true;
             }
 
-            for (int i = 0; i < device.getInterfaceCount(); i++) {
-                UsbInterface intf = device.getInterface(i);
-                report.append("    Interface ").append(i).append(": class=0x")
-                        .append(String.format("%02X", intf.getInterfaceClass()))
-                        .append(" (" + getInterfaceClassName(intf.getInterfaceClass()) + ")")
-                        .append(" subclass=0x").append(String.format("%02X", intf.getInterfaceSubclass()))
-                        .append(" protocol=0x").append(String.format("%02X", intf.getInterfaceProtocol()))
-                        .append(" endpoints=").append(intf.getEndpointCount()).append("\n");
-            }
+            report.append("  Usb Probe: ").append(runUsbProbe(device)).append("\n");
             report.append("\n");
         }
 
         report.append("Summary:\n");
         report.append("  - Standard printer support detected: ").append(hasStandardPrinter ? "YES" : "NO").append("\n");
-        report.append("  - Vendor-specific device surfaces: ").append(hasVendorSpecific ? "YES" : "NO").append("\n");
-        report.append("\n");
+        report.append("  - Vendor-specific device surfaces: ").append(hasVendorSpecific ? "YES" : "NO").append("\n\n");
         if (hasStandardPrinter) {
             report.append("This device exposes a standard printer interface. Generic USB printer APIs may work.\n");
         } else {
@@ -234,12 +228,64 @@ public class UsbDiagnostics {
         if (hasVendorSpecific) {
             report.append("The connected device appears vendor-specific and likely requires a proprietary driver or SDK.\n");
         }
-        report.append("If printing is required, the next useful checks are:\n");
+        report.append("\n");
+        report.append(getPackageInspectionInfo());
+        report.append("\nIf printing is required, the next useful checks are:\n");
         report.append("  1) Verify vendor SDK or driver documentation for the device.\n");
         report.append("  2) Test whether the device supports bulk IN/OUT transfers for custom protocol data.\n");
         report.append("  3) Compare with the existing SmartPosDemo app behavior to identify printer-specific commands.\n");
 
         return report.toString();
+    }
+
+    private String runUsbProbe(UsbDevice device) {
+        if (!usbManager.hasPermission(device)) {
+            return "NO PERMISSION";
+        }
+
+        UsbDeviceConnection connection = usbManager.openDevice(device);
+        if (connection == null) {
+            return "FAILED TO OPEN DEVICE";
+        }
+
+        StringBuilder probeResult = new StringBuilder();
+        boolean anyClaimed = false;
+
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
+            UsbInterface intf = device.getInterface(i);
+            if (!connection.claimInterface(intf, true)) {
+                probeResult.append("    Interface ").append(i).append(" claim failed\n");
+                continue;
+            }
+            anyClaimed = true;
+            probeResult.append("    Interface ").append(i).append(" claimed\n");
+
+            for (int e = 0; e < intf.getEndpointCount(); e++) {
+                UsbEndpoint endpoint = intf.getEndpoint(e);
+                if (endpoint.getType() != UsbConstants.USB_ENDPOINT_XFER_BULK) {
+                    continue;
+                }
+                if (endpoint.getDirection() != UsbConstants.USB_DIR_OUT) {
+                    continue;
+                }
+                byte[] testData = new byte[0];
+                int result = connection.bulkTransfer(endpoint, testData, 0, 200);
+                probeResult.append("      OUT endpoint ").append(e).append(" test result=").append(result).append("\n");
+                if (result >= 0) {
+                    probeResult.append("      Bulk OUT probe appears accepted.\n");
+                    connection.releaseInterface(intf);
+                    connection.close();
+                    return probeResult.toString().trim();
+                }
+            }
+            connection.releaseInterface(intf);
+        }
+
+        connection.close();
+        if (!anyClaimed) {
+            return "NO CLAIMABLE INTERFACES";
+        }
+        return probeResult.append("    No bulk OUT probe succeeded\n").toString().trim();
     }
 
     private boolean hasBulkEndpoints(UsbDevice device) {
@@ -277,9 +323,54 @@ public class UsbDiagnostics {
         return false;
     }
 
-    /**
-     * Convert USB device class to human-readable name.
-     */
+    private String getPackageInspectionInfo() {
+        StringBuilder info = new StringBuilder();
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> packages = pm.getInstalledPackages(0);
+
+        info.append("\n--- Vendor/Driver Package Inspection ---\n");
+        int found = 0;
+        for (PackageInfo pkg : packages) {
+            String name = pkg.packageName.toLowerCase();
+            if (name.contains("dukkentek") || name.contains("smartpos") || name.contains("paydevice") || name.contains("printer") || name.contains("pos")) {
+                CharSequence label = pkg.applicationInfo.loadLabel(pm);
+                info.append("  - ").append(pkg.packageName).append(" (" ).append(label).append(")\n");
+                found++;
+            }
+        }
+        if (found == 0) {
+            info.append("  No likely vendor or printer driver packages found by name.\n");
+        }
+
+        return info.toString();
+    }
+
+    private String endpointTypeName(int type) {
+        switch (type) {
+            case UsbConstants.USB_ENDPOINT_XFER_CONTROL:
+                return "CONTROL";
+            case UsbConstants.USB_ENDPOINT_XFER_ISOC:
+                return "ISOCHRONOUS";
+            case UsbConstants.USB_ENDPOINT_XFER_BULK:
+                return "BULK";
+            case UsbConstants.USB_ENDPOINT_XFER_INT:
+                return "INTERRUPT";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    private String endpointDirectionName(int direction) {
+        switch (direction) {
+            case UsbConstants.USB_DIR_IN:
+                return "IN";
+            case UsbConstants.USB_DIR_OUT:
+                return "OUT";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     private String getDeviceClassName(int deviceClass) {
         switch (deviceClass) {
             case 0x00: return "Device Defined Class";
@@ -302,9 +393,6 @@ public class UsbDiagnostics {
         }
     }
 
-    /**
-     * Convert USB interface class to human-readable name.
-     */
     private String getInterfaceClassName(int interfaceClass) {
         switch (interfaceClass) {
             case 0x00: return "Interface Defined Class";

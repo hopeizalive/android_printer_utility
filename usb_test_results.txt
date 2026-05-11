@@ -1,0 +1,43 @@
+
+=== USB PRINTER TEST ===
+API Level: 25
+USB Host Feature: SUPPORTED
+Found 2 USB device(s):
+
+Device: /dev/bus/usb/001/004
+  Vendor ID: 0x2C7C
+  Product ID: 0x0125
+  Device Class: 0xEF (Unknown (0xEF))
+  Interface count: 5
+  Standard printer interface: NO
+  Vendor-specific interface: YES
+  Bulk endpoints present: YES
+    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=2
+    Interface 1: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 2: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 3: class=0xFF (Vendor Specific) subclass=0x00 protocol=0x00 endpoints=3
+    Interface 4: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=3
+
+Device: /dev/bus/usb/001/003
+  Vendor ID: 0x0FE6
+  Product ID: 0x9900
+  Device Class: 0x00 (Device Defined Class)
+  Interface count: 4
+  Standard printer interface: NO
+  Vendor-specific interface: YES
+  Bulk endpoints present: YES
+    Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0x00 endpoints=3
+    Interface 1: class=0x02 (Communications Control) subclass=0x06 protocol=0x00 endpoints=1
+    Interface 2: class=0x0A (Smart Card) subclass=0x00 protocol=0x00 endpoints=0
+    Interface 3: class=0x0A (Smart Card) subclass=0x00 protocol=0x00 endpoints=2
+
+Summary:
+  - Standard printer support detected: NO
+  - Vendor-specific device surfaces: YES
+
+This device does not expose a standard printer interface. Generic printer APIs are unlikely to work.
+The connected device appears vendor-specific and likely requires a proprietary driver or SDK.
+If printing is required, the next useful checks are:
+  1) Verify vendor SDK or driver documentation for the device.
+  2) Test whether the device supports bulk IN/OUT transfers for custom protocol data.
+  3) Compare with the existing SmartPosDemo app behavior to identify printer-specific commands.
