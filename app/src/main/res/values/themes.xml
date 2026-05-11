@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.PrinterUtil" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">?attr/colorSurface</item>
-        <item name="android:navigationBarColor">?attr/colorSurface</item>
+    <style name="Theme.PrinterUtil" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">#F5F5F5</item>
+        <item name="android:navigationBarColor">#F5F5F5</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 </resources>
