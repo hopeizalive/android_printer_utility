@@ -2,7 +2,7 @@
 === USB PRINTER TEST ===
 API Level: 25
 USB Host Feature: SUPPORTED
-Found 2 USB device(s):
+Found 3 USB device(s):
 
 Device: /dev/bus/usb/001/004
   Vendor ID: 0x2C7C
@@ -36,11 +36,23 @@ Device: /dev/bus/usb/001/003
       OUT endpoint 1 test result=-1
     No bulk OUT probe succeeded
 
+Device: /dev/bus/usb/001/006
+  Vendor ID: 0x4B43
+  Product ID: 0x3830
+  Device Class: 0x00 (Device Defined Class)
+  Interface count: 1
+  Standard printer interface: YES
+  Vendor-specific interface: NO
+  Bulk endpoints present: YES
+  Usb Probe: Interface 0 claimed
+      OUT endpoint 0 test result=0
+      Bulk OUT probe appears accepted.
+
 Summary:
-  - Standard printer support detected: NO
+  - Standard printer support detected: YES
   - Vendor-specific device surfaces: YES
 
-This device does not expose a standard printer interface. Generic printer APIs are unlikely to work.
+This device exposes a standard printer interface. Generic USB printer APIs may work.
 The connected device appears vendor-specific and likely requires a proprietary driver or SDK.
 
 

@@ -6,7 +6,7 @@ PrintManager available: true
 
 Print job listing requires API 28+ (current device is lower).
 
-USB devices (2):
+USB devices (3):
 • Android  VID=0x2C7C PID=0x0125  /dev/bus/usb/001/004
     DeviceClass: 0xEF (Unknown)
     Interface 0: class=0xFF (Vendor Specific) subclass=0xFF protocol=0xFF endpoints=2
@@ -20,10 +20,12 @@ USB devices (2):
     Interface 0: class=0x02 (Communications) subclass=0x06 protocol=0x00 endpoints=1
     Interface 1: class=0x0A (CDC Data) subclass=0x00 protocol=0x00 endpoints=0
     Interface 2: class=0x0A (CDC Data) subclass=0x00 protocol=0x00 endpoints=2
+• TA-900U [printer-class]  VID=0x4B43 PID=0x3830  /dev/bus/usb/001/006
+    DeviceClass: 0x00 (Device Defined)
+    Interface 0: class=0x07 (Printer) subclass=0x01 protocol=0x02 endpoints=2
 
-Likely USB printers (class 7 / interface printer): 0
+Likely USB printers (class 7 / interface printer): 1
 Vendor-specific USB devices: 2
-Note: One or more connected USB devices use vendor-specific interfaces and may require a proprietary driver or SDK.
 Note: Standard USB printer commands are only likely to work if the device reports printer class or has printer interfaces.
 
 Notes:

@@ -73,6 +73,31 @@
         app:layout_constraintBaseline_toBaselineOf="@id/buttonRefresh"
         app:layout_constraintStart_toEndOf="@id/buttonPrintSettings" />
 
+    <LinearLayout
+        android:id="@+id/rowPrintTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/buttonRefresh">
+
+        <Button
+            android:id="@+id/buttonPrintTestReceipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/print_test_receipt" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imagePrintStatus"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="10dp"
+            android:contentDescription="@string/print_status_icon_cd"
+            app:srcCompat="@drawable/ic_print_status_failed" />
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -81,7 +106,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttonRefresh">
+        app:layout_constraintTop_toBottomOf="@id/rowPrintTest">
 
         <TextView
             android:id="@+id/textStatus"

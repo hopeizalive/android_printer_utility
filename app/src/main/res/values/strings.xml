@@ -5,4 +5,8 @@
     <string name="copy_to_clipboard">Copy</string>
     <string name="tab_diagnostics">Diagnostics</string>
     <string name="tab_usb_test">USB Test</string>
+    <string name="print_test_receipt">Print test receipt</string>
+    <string name="print_status_icon_cd">USB test print status</string>
+    <string name="print_status_failed_cd">Receipt not printed yet or last print failed</string>
+    <string name="print_status_ok_cd">Receipt printed successfully</string>
 </resources>
